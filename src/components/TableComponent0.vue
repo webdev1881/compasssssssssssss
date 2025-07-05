@@ -100,6 +100,9 @@
               <th class="sub-header">%</th>
             </tr>
           </thead>
+
+
+          
           <tbody>
             <template v-for="(storeGroup, networkName) in groupedStores" :key="networkName">
               <tr class="network-separator-row">
