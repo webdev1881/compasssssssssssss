@@ -32,9 +32,9 @@
       <table class="custom-table">
         <thead>
           <tr>
-            <th style="width: 250px;" rowspan="3" class="store-name-column">Мережа</th>
+            <th style="width: 230px;" rowspan="3" class="store-name-column">Мережа</th>
             <th v-for="week in weeks" :key="week.id" :colspan="11" class="week-group">
-              {{ week.name }} ({{ week.dateRange }})
+              {{ week.name }}   ({{ week.dateRange }})
             </th>
           </tr>
           <tr>
@@ -44,14 +44,14 @@
               <th rowspan="2" class="metric-header">Втрати<br>Списання</th>
               <th rowspan="2" class="metric-header">Недостачі</th>
               <th rowspan="2" class="metric-header">ФОП</th>
-              <th rowspan="2" class="metric-header">Від сміні<br>залишки</th>
+              <th rowspan="2" class="metric-header">Від'єміні<br>залишки</th>
               <th rowspan="2" class="metric-header">Не проведені<br>списання</th>
             </template>
           </tr>
           <tr>
             <template v-for="week in weeks" :key="week.id">
               <th rowspan="3" class="store-rank-column">РАНГ</th>
-              <th rowspan="3" class="score-max">649</th>
+              <th rowspan="3" class="score-max">900</th>
               <th rowspan="3" class="score-current">100</th>
               <th class="plan-column">План</th>
               <th class="fact-column">Факт</th>
@@ -60,7 +60,7 @@
           </tr>
         </thead>
 
-        <tbody name="table-row" is="transition-group" tag="tbody">
+        <tbody name="table-row" is="transition-group" tag="tbody" class="total_tbody">
           <transition-group appear>
             <tr v-for="region in sortedRegions" :key="`region-${region.id}`" class="region-row">
               <td class="region-name">
@@ -72,13 +72,10 @@
               <template v-for="week in weeks" :key="week.id">
                 <td class="region-rank">{{ region.rank }}</td>
                 <td class="score-max">{{ region.totalScore.max }}</td>
-                <td class="score-current" :class="getScoreClass(region.totalScore.current)">{{ region.totalScore.current
-                }}</td>
+                <td class="score-current" :class="getScoreClass(region.totalScore.current)">{{ region.totalScore.current}}</td>
                 <td class="plan">{{ formatNumber(getRegionWeekData(region, week.id).plan) }}</td>
                 <td class="fact">{{ formatNumber(getRegionWeekData(region, week.id).fact) }}</td>
-                <td class="percent" :class="getPercentClass(getRegionWeekData(region, week.id).percent)">
-                  {{ getRegionWeekData(region, week.id).percent }}%
-                </td>
+                <td class="percent" :class="getPercentClass(getRegionWeekData(region, week.id).percent)">{{ getRegionWeekData(region, week.id).percent }}%</td>
                 <td class="losses">{{ formatNumber(getRegionWeekData(region, week.id).losses) }}</td>
                 <td class="shortages">{{ formatNumber(getRegionWeekData(region, week.id).shortages) }}</td>
                 <td class="fop">{{ formatNumber(getRegionWeekData(region, week.id).fop) }}</td>
@@ -109,7 +106,7 @@
 
         <thead v-show="1" style="visibility: collapse;" >
           <tr>
-            <th style="width: 250px;" rowspan="3" class="store-name-column">Мережа</th>
+            <th style="width: 230px;" rowspan="3" class="store-name-column">Мережа</th>
             <th v-for="week in weeks" :key="week.id" :colspan="11" class="week-group">
               {{ week.name }} ({{ week.dateRange }})
             </th>
@@ -121,14 +118,14 @@
               <th rowspan="2" class="metric-header">Втрати<br>Списання</th>
               <th rowspan="2" class="metric-header">Недостачі</th>
               <th rowspan="2" class="metric-header">ФОП</th>
-              <th rowspan="2" class="metric-header">Від сміні<br>залишки</th>
+              <th rowspan="2" class="metric-header"><br>залишки</th>
               <th rowspan="2" class="metric-header">Не проведені<br>списання</th>
             </template>
           </tr>
           <tr>
             <template v-for="week in weeks" :key="week.id">
               <th rowspan="3" class="store-rank-column">РАНГ</th>
-              <th rowspan="3" class="score-max">649</th>
+              <th rowspan="3" class="score-max">900</th>
               <th rowspan="3" class="score-current">100</th>
               <th class="plan-column">План</th>
               <th class="fact-column">Факт</th>
@@ -137,7 +134,7 @@
           </tr>
         </thead>
 
-        <tbody name="table-row" is="transition-group" tag="tbody">
+        <tbody name="table-row" is="transition-group" tag="tbody" class="total_tbody">
 
           <transition-group appear>
           <tr v-for="store in getAllSortedStores()" :key="`store-${store.id}`" class="store-row">
@@ -151,26 +148,27 @@
             <template v-for="week in weeks" :key="week.id">
               <td class="store-rank">{{ store.rank }}</td>
               <td class="score-max">{{ store.regionScore.max }}</td>
-              <td class="score-current" :class="getScoreClass(store.regionScore.current)">{{ store.regionScore.current
-              }}</td>
+              <td class="score-current" :class="getScoreClass(store.regionScore.current)">{{ store.regionScore.current}}</td>
               <td class="plan">{{ formatNumber(getStoreWeekData(store, week.id).plan) }}</td>
               <td class="fact">{{ formatNumber(getStoreWeekData(store, week.id).fact) }}</td>
-              <td class="percent" :class="getPercentClass(getStoreWeekData(store, week.id).percent)">
-                {{ getStoreWeekData(store, week.id).percent }}%
-              </td>
+              <td class="percent" :class="getPercentClass(getStoreWeekData(store, week.id).percent)">{{ getStoreWeekData(store, week.id).percent }}%</td>
               <td class="losses">{{ formatNumber(getStoreWeekData(store, week.id).losses) }}</td>
               <td class="shortages">{{ formatNumber(getStoreWeekData(store, week.id).shortages) }}</td>
               <td class="fop">{{ formatNumber(getStoreWeekData(store, week.id).fop) }}</td>
 
-              <td v-if="getStoreWeekData(store, week.id).shiftRemainder" class="status-value negative">
-                {{ getStoreWeekData(store, week.id).shiftRemainder }}
-              </td><span v-else class="status-value">-</span>
-              <td v-if="getStoreWeekData(store, week.id).unprocessed" class="status-value negative">
-                {{ getStoreWeekData(store, week.id).unprocessed }}
+              <td class="shift">
+                <span v-if="getStoreWeekData(store, week.id).shiftRemainder" class="status-value negative">
+                    {{ getStoreWeekData(store, week.id).shiftRemainder }}
+                  </span><span v-else class="status-value">-</span>
               </td>
-              <span v-else class="status-value">-</span>
 
-              <td class="unprocessed">{{ getStoreWeekData(store, week.id).unprocessed }}</td>
+              <td class="unprocessed">
+                <span v-if="getStoreWeekData(store, week.id).unprocessed" class="status-value negative">
+                {{ getStoreWeekData(store, week.id).unprocessed }}
+                </span><span v-else class="status-value">-</span>
+              </td>
+
+
             </template>
           </tr>
           </transition-group>
@@ -502,6 +500,14 @@ export default {
 </script>
 
 <style scoped>
+
+
+.total_tbody {
+  text-align: center;
+}
+
+
+
 .sales-table-container {
   padding: 20px;
   /* font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; */
@@ -922,7 +928,7 @@ export default {
   color: white;
   font-weight: 600;
   padding: 8px 12px;
-  text-align: left;
+  /* text-align: left; */
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -936,7 +942,7 @@ export default {
   /* display: flex; */
   align-items: center;
   gap: 8px;
-  width: 250px;
+  width: 20px;
 }
 
 .network-title {
@@ -1134,7 +1140,7 @@ export default {
 /* Улучшенные hover эффекты для строк */
 .region-row,
 .store-row {
-  transition: all 0.1s ease;
+  transition: all 0.11s ease;
   transform-origin: center;
 }
 
