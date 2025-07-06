@@ -1,19 +1,25 @@
 <template>
   <div id="app">
-    <TableComponent />
-    <!-- <TableComponent0 /> -->
+    <!-- <TableComponent /> -->
+    <!-- <Tt /> -->
+    <T />
+    <TableComponent0 />
   </div>
 </template>
 
 <script>
 import TableComponent from './components/TableComponent.vue'
 import TableComponent0 from './components/TableComponent0.vue'
+import T from './components/T.vue'
+import Tt from './components/Tt.vue'
 
 export default {
   name: 'App',
   components: {
     TableComponent,
     TableComponent0,
+    T,
+    Tt,
   }
 }
 </script>

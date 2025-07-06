@@ -264,7 +264,7 @@ export default {
 
 .content {
   padding: 20px;
-  animation: fadeIn 0.5s ease-in;
+  animation: fadeIn 0.25s ease-in;
 }
 
 @keyframes fadeIn {

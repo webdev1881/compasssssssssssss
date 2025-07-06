@@ -1,7 +1,10 @@
 <template>
   <div class="sales-table-container table-container">
+    <div v-if="loading" class="loading-bar">
+      <div class="loading-progress"></div>
+    </div>
 
-    <div class="controls-panel">
+    <div class="controls-panel" v-if="!loading && !error">
       <div class="sorting-controls">
         <label>Сортировка:</label>
         <select v-model="sortBy" @change="handleSort" :disabled="isAnimating">
@@ -10,48 +13,62 @@
           <option value="storePercent">Магазины по % выполнения</option>
         </select>
 
-        <button @click="toggleSortOrder" class="sort-order-btn" :class="{ 'animating': isAnimating }">
+        <!-- <button @click="toggleSortOrder" class="sort-order-btn" :class="{ 'animating': isAnimating }">
           {{ sortOrder === 'asc' ? '↑' : '↓' }}
-        </button>
+        </button> -->
 
-        <button @click="refreshData" class="refresh-btn" :disabled="loading || isAnimating">
+        <!-- <button @click="refreshData" class="refresh-btn" :disabled="loading || isAnimating">
           🔄 Обновить
-        </button>
+        </button> -->
+
+        <!-- <button @click="showPlanFactColumns = !showPlanFactColumns" class="toggle-columns-btn">
+          {{ showPlanFactColumns ? '👁️ Скрыть План/Факт' : '👁️‍🗨️ Показать План/Факт' }}
+        </button> -->
+
+        <!-- <button @click="toggleColumn = !toggleColumn" class="toggle-columns-btn">
+          {{ toggleColumn ? '👁️ Скрыть План/Факт' : '👁️‍🗨️ Показать План/Факт' }}
+        </button> -->
+
       </div>
-    
     </div>
 
-    <div class="" v-if="!loading && !error">
-
+    <div v-if="!loading && !error">
       <table class="custom-table">
         <thead>
           <tr>
             <th style="width: 230px;" rowspan="3" class="store-name-column">Регион / Магазин</th>
-            <th v-for="week in weeks" :key="week.id" :colspan="11" class="week-group">
-              <tr>
 
-                {{ week.name }}  ({{ week.dateRange }})
-              </tr>
-            </th>
+            <th v-for="week in weeks" :key="week.id" :colspan="11" class="week-group">{{ week.name }}  ({{ week.dateRange }})</th>
+            <th v-for="week in weeks" :key="week.id" :colspan="showPlanFactColumns ? 11 : 9" class="week-group"></th>
           </tr>
           <tr>
             <template v-for="week in weeks" :key="week.id">
               <th colspan="2" class="metric-header">Загальний бал</th>
-              <th colspan="4" class="metric-header">Виторг</th>
+
+              <!-- <th colspan="4" class="metric-header">Виторг</th> -->
+
+              <th :colspan="showPlanFactColumns ? 4 : 2" class="metric-header">Виторг <span @click="showPlanFactColumns = !showPlanFactColumns" class="add">+/-</span> </th>
+
               <th rowspan="2" class="metric-header">Втрати<br>Списання</th>
               <th rowspan="2" class="metric-header">Недостачі</th>
               <th rowspan="2" class="metric-header">ФОП</th>
-              <th rowspan="2" class="metric-header">Від'єміні<br>залишки</th>
+              <th rowspan="2" class="metric-header">Від'ємні<br>залишки</th>
               <th rowspan="2" class="metric-header">Не проведені<br>списання</th>
             </template>
           </tr>
           <tr>
             <template v-for="week in weeks" :key="week.id">
-              <th rowspan="3" class="store-rank-column">РАНГ</th>
-              <th rowspan="3" class="score-max">900</th>
-              <th rowspan="3" class="score-current">100</th>
-              <th class="plan-column">План</th>
-              <th class="fact-column">Факт</th>
+              <th class="store-rank-column">РАНГ</th>
+              <th class="score-max">900</th>
+              <th class="score-current">100</th>
+
+              <th v-if="showPlanFactColumns" class="plan-column">План</th>
+               
+              <!-- <div class="city-cell">План</div> -->
+
+
+              <th v-if="showPlanFactColumns" class="fact-column">Факт</th>
+
               <th class="percent-column">%</th>
             </template>
           </tr>
@@ -67,86 +84,105 @@
                 </div>
               </td>
               <template v-for="week in weeks" :key="week.id">
-                <td class="region-rank">{{ region.rank }}</td>
-                <td class="score-max">{{ region.totalScore.max }}</td>
-                <td class="score-current" :class="getScoreClass(region.totalScore.current)">{{ region.totalScore.current}}</td>
-                <td class="plan">{{ formatNumber(getRegionWeekData(region, week.id).plan) }}</td>
+                <td class="region-rank">{{ getRegionRank(region) }}</td>
+
+                <td class="score-max">{{ getRegionTotalScore(region).max }}</td>
+                <td class="score-current" :class="getScoreClass(getRegionTotalScore(region).current)">{{
+                  getRegionTotalScore(region).current }}</td>
+
+                <!-- <td class="plan">{{ formatNumber(getRegionWeekData(region, week.id).plan) }}</td>
                 <td class="fact">{{ formatNumber(getRegionWeekData(region, week.id).fact) }}</td>
-                <td class="percent" :class="getPercentClass(getRegionWeekData(region, week.id).percent)">{{ getRegionWeekData(region, week.id).percent }}%</td>
+                <td class="percent" :class="getPercentClass(getRegionWeekData(region, week.id).percent)"> {{ getRegionWeekData(region, week.id).percent }}%</td> -->
+                <td v-if="showPlanFactColumns" class="plan">{{ formatNumber(getRegionWeekData(region, week.id).plan) }}
+                </td>
+                <td v-if="showPlanFactColumns" class="fact">{{ formatNumber(getRegionWeekData(region, week.id).fact) }}
+                </td>
+                <td class="percent" :class="getPercentClass(getRegionWeekData(region, week.id).percent)"> {{
+                  getRegionWeekData(region, week.id).percent }}%</td>
+                <!-- <td class="percent" :class="getPercentClass(getRegionWeekData(region, week.id).percent)"></td> -->
+
+
                 <td class="losses">{{ formatNumber(getRegionWeekData(region, week.id).losses) }}</td>
                 <td class="shortages">{{ formatNumber(getRegionWeekData(region, week.id).shortages) }}</td>
                 <td class="fop">{{ formatNumber(getRegionWeekData(region, week.id).fop) }}</td>
-
                 <td class="shift">
                   <span v-if="getRegionWeekData(region, week.id).shiftRemainder" class="status-value negative">
                     {{ getRegionWeekData(region, week.id).shiftRemainder }}
-                  </span><span v-else class="status-value">-</span>
+                  </span>
+                  <span v-else class="status-value">-</span>
                 </td>
-
                 <td class="unprocessed">
                   <span v-if="getRegionWeekData(region, week.id).unprocessed" class="status-value negative">
                     {{ getRegionWeekData(region, week.id).unprocessed }}
-                  </span><span v-else class="status-value">-</span>
+                  </span>
+                  <span v-else class="status-value">-</span>
                 </td>
-
-
               </template>
             </tr>
           </transition-group>
         </tbody>
+
         <br>
+
         <tbody name="table-row" is="transition-group" tag="tbody" class="total_tbody">
-
           <transition-group appear>
-          <tr v-for="store in getAllSortedStores()" :key="`store-${store.id}`" class="store-row">
-            <td class="store-name">
-              <div class="store-info">
-                <span class="region-indicator" :style="{ backgroundColor: colors[store.regionName] }"></span>
-                <span class="store-rank-number">{{ store.rank }}</span>
-                <span class="store-title">{{ store.name }}</span>
-              </div>
-            </td>
-            <template v-for="week in weeks" :key="week.id">
-              <td class="store-rank">{{ store.rank }}</td>
-              <td class="score-max">{{ store.regionScore.max }}</td>
-              <td class="score-current" :class="getScoreClass(store.regionScore.current)">{{ store.regionScore.current}}</td>
-              <td class="plan">{{ formatNumber(getStoreWeekData(store, week.id).plan) }}</td>
-              <td class="fact">{{ formatNumber(getStoreWeekData(store, week.id).fact) }}</td>
-              <td class="percent" :class="getPercentClass(getStoreWeekData(store, week.id).percent)">{{ getStoreWeekData(store, week.id).percent }}%</td>
-              <td class="losses">{{ formatNumber(getStoreWeekData(store, week.id).losses) }}</td>
-              <td class="shortages">{{ formatNumber(getStoreWeekData(store, week.id).shortages) }}</td>
-              <td class="fop">{{ formatNumber(getStoreWeekData(store, week.id).fop) }}</td>
+            <tr v-for="store in getAllSortedStores()" :key="`store-${store.id}`" class="store-row">
+              <td class="store-name">
+                <div class="store-info">
+                  <span class="region-indicator" :style="{ backgroundColor: colors[store.regionName] }"></span>
+                  <span class="store-rank-number">{{ store.rank }}</span>
+                  <span class="store-title">{{ store.name }}</span>
+                </div>
+              </td>
+              <template v-for="week in weeks" :key="week.id">
+                <td class="store-rank">{{ store.rank }}</td>
 
-              <td class="shift">
-                <span v-if="getStoreWeekData(store, week.id).shiftRemainder" class="status-value negative">
+                <!-- <td class="score-max">{{ getRegionTotalScore(store.regionName).max }}</td>
+                <td class="score-current" :class="getRegionTotalScore(store.regionName).current">{{ getRegionTotalScore(store.regionName).current }}</td> -->
+
+                <td class="score-max">{{ getRegionTotalScore(store.regionName).max }}</td>
+                <td class="score-current" :class="getScoreClass(getRegionTotalScore(store.regionName).current)">{{
+                  getRegionTotalScore(store.regionName).current }}</td>
+
+                <!-- <td class="plan">{{ formatNumber(getStoreWeekData(store, week.id).plan) }}</td>
+                <td class="fact">{{ formatNumber(getStoreWeekData(store, week.id).fact) }}</td>
+                <td class="percent" :class="getPercentClass(getStoreWeekData(store, week.id).percent)">{{ getStoreWeekData(store, week.id).percent }}%</td> -->
+
+                <td v-if="showPlanFactColumns" class="plan">{{ formatNumber(getStoreWeekData(store, week.id).plan) }}
+                </td>
+                <td v-if="showPlanFactColumns" class="fact">{{ formatNumber(getStoreWeekData(store, week.id).fact) }}
+                </td>
+                <td class="percent" :class="getPercentClass(getStoreWeekData(store, week.id).percent)">{{
+                  getStoreWeekData(store, week.id).percent }}%</td>
+                <!-- <td class="percent" :class="getPercentClass(getStoreWeekData(store, week.id).percent)"></td> -->
+
+                <td class="losses">{{ formatNumber(getStoreWeekData(store, week.id).losses) }}</td>
+                <td class="shortages">{{ formatNumber(getStoreWeekData(store, week.id).shortages) }}</td>
+                <td class="fop">{{ formatNumber(getStoreWeekData(store, week.id).fop) }}</td>
+                <td class="shift">
+                  <span v-if="getStoreWeekData(store, week.id).shiftRemainder" class="status-value negative">
                     {{ getStoreWeekData(store, week.id).shiftRemainder }}
-                  </span><span v-else class="status-value">-</span>
-              </td>
-
-              <td class="unprocessed">
-                <span v-if="getStoreWeekData(store, week.id).unprocessed" class="status-value negative">
-                {{ getStoreWeekData(store, week.id).unprocessed }}
-                </span><span v-else class="status-value">-</span>
-              </td>
-
-
-            </template>
-          </tr>
+                  </span>
+                  <span v-else class="status-value">-</span>
+                </td>
+                <td class="unprocessed">
+                  <span v-if="getStoreWeekData(store, week.id).unprocessed" class="status-value negative">
+                    {{ getStoreWeekData(store, week.id).unprocessed }}
+                  </span>
+                  <span v-else class="status-value">-</span>
+                </td>
+              </template>
+            </tr>
           </transition-group>
         </tbody>
       </table>
-
-      <br>
-
     </div>
 
-    <!-- Состояние загрузки -->
     <div v-else-if="loading" class="loading">
       <div class="loading-spinner"></div>
       <p>Загрузка данных...</p>
     </div>
 
-    <!-- Состояние ошибки -->
     <div v-else-if="error" class="error">
       <div class="error-icon">⚠️</div>
       <h3>Ошибка загрузки данных</h3>
@@ -167,15 +203,22 @@ export default {
     const salesData = ref(null)
     const sortBy = ref('regionRank')
     const sortOrder = ref('asc')
+    const isAnimating = ref(false)
+    const showPlanFactColumns = ref(true)
+
+const showColumn = ref(true)
+
+const toggleColumn = () => {
+  showColumn.value = !showColumn.value
+}
+
     const colors = ref({
-      'Белая Церковь': '#6f4b4f',
+      'Белая Церковь': '#f44336',
       'Днепр': '#ffc107',
-      'Киев': '#28a745',
-      'Харьков': '#007bff',
+      'Киев': '#4caf50',
+      'Харьков': '#2196f3',
     })
 
-
-    // Загрузка данных
     const loadData = async () => {
       try {
         loading.value = true
@@ -187,18 +230,19 @@ export default {
         }
 
         const data = await response.json()
-        console.log('Загруженные данные:', data);
 
-
-        // Валидация данных
         if (!data.weeks || !data.regions) {
           throw new Error('Неверная структура данных')
-        } else {
-          data.weeks.reverse()
-          data.regions.reverse()
         }
 
-        salesData.value = data
+
+
+        setTimeout(() => {
+          salesData.value = data
+          loading.value = false
+        }, 1500)
+
+
       } catch (err) {
         console.error('Ошибка загрузки данных:', err)
         error.value = err.message || 'Ошибка загрузки данных'
@@ -207,11 +251,101 @@ export default {
       }
     }
 
-    // Вычисляемые свойства
     const weeks = computed(() => salesData.value?.weeks || [])
     const regions = computed(() => salesData.value?.regions || [])
 
-    // Сортировка регионов
+    const getRegionWeekData = (region, weekId) => {
+      const stores = region.stores || []
+      const weekData = {
+        plan: 0,
+        fact: 0,
+        losses: 0,
+        shortages: 0,
+        fop: 0,
+        shiftRemainder: 0,
+        unprocessed: 0
+      }
+
+      stores.forEach(store => {
+        const storeWeekData = store.weeklyData?.find(w => w.weekId === weekId)
+        if (storeWeekData) {
+          weekData.plan += storeWeekData.plan || 0
+          weekData.fact += storeWeekData.fact || 0
+          weekData.losses += storeWeekData.losses || 0
+          weekData.shortages += storeWeekData.shortages || 0
+          weekData.fop += storeWeekData.fop || 0
+          weekData.shiftRemainder += storeWeekData.shiftRemainder || 0
+          weekData.unprocessed += storeWeekData.unprocessed || 0
+        }
+      })
+
+      weekData.percent = weekData.plan > 0 ? Math.round((weekData.fact / weekData.plan) * 100) : 0
+
+      return weekData
+    }
+
+    const getRegionTotalScore = (region) => {
+      const stores = region.stores || []
+      let maxScore = 0
+      let currentScore = 0
+
+      stores.forEach(store => {
+        if (store.totalScore) {
+          maxScore += store.totalScore.max || 0
+          currentScore += store.totalScore.current || 0
+        }
+      })
+
+      return { max: maxScore, current: currentScore }
+    }
+
+    const getRegionRank = (region) => {
+      const allRegions = [...regions.value]
+      allRegions.sort((a, b) => {
+        const aPercent = getTotalPercentForRegion(a)
+        const bPercent = getTotalPercentForRegion(b)
+        return bPercent - aPercent
+      })
+
+      return allRegions.findIndex(r => r.id === region.id) + 1
+    }
+
+    const getTotalPlanForRegion = (region) => {
+      let totalPlan = 0
+      const stores = region.stores || []
+
+      stores.forEach(store => {
+        if (store.weeklyData) {
+          store.weeklyData.forEach(week => {
+            totalPlan += week.plan || 0
+          })
+        }
+      })
+
+      return totalPlan
+    }
+
+    const getTotalFactForRegion = (region) => {
+      let totalFact = 0
+      const stores = region.stores || []
+
+      stores.forEach(store => {
+        if (store.weeklyData) {
+          store.weeklyData.forEach(week => {
+            totalFact += week.fact || 0
+          })
+        }
+      })
+
+      return totalFact
+    }
+
+    const getTotalPercentForRegion = (region) => {
+      const totalPlan = getTotalPlanForRegion(region)
+      const totalFact = getTotalFactForRegion(region)
+      return totalPlan > 0 ? Math.round((totalFact / totalPlan) * 100) : 0
+    }
+
     const sortedRegions = computed(() => {
       if (!regions.value) return []
 
@@ -222,20 +356,8 @@ export default {
 
         switch (sortBy.value) {
           case 'regionRank':
-            aValue = a.rank
-            bValue = b.rank
-            break
-          case 'regionName':
-            aValue = a.name || ''
-            bValue = b.name || ''
-            break
-          case 'regionTotalPlan':
-            aValue = getTotalPlanForRegion(a)
-            bValue = getTotalPlanForRegion(b)
-            break
-          case 'regionTotalFact':
-            aValue = getTotalFactForRegion(a)
-            bValue = getTotalFactForRegion(b)
+            aValue = getRegionRank(a)
+            bValue = getRegionRank(b)
             break
           case 'regionTotalPercent':
             aValue = getTotalPercentForRegion(a)
@@ -245,31 +367,12 @@ export default {
             return 0
         }
 
-        if (typeof aValue === 'string') {
-          return sortOrder.value === 'asc'
-            ? aValue.localeCompare(bValue)
-            : bValue.localeCompare(aValue)
-        } else {
-          return sortOrder.value === 'asc'
-            ? aValue - bValue
-            : bValue - aValue
-        }
+        return sortOrder.value === 'asc' ? aValue - bValue : bValue - aValue
       })
 
       return sorted
     })
 
-    // Получение данных региона за конкретную неделю
-    const getRegionWeekData = (region, weekId) => {
-      if (!region || !region.weeklyData) {
-        return { plan: 0, fact: 0, percent: 0, losses: 0, shortages: 0, fop: 0, shiftRemainder: 0, unprocessed: 0 }
-      }
-
-      const weekData = region.weeklyData.find(w => w.weekId === weekId)
-      return weekData || { plan: 0, fact: 0, percent: 0, losses: 0, shortages: 0, fop: 0, shiftRemainder: 0, unprocessed: 0 }
-    }
-
-    // Получение данных магазина за конкретную неделю
     const getStoreWeekData = (store, weekId) => {
       if (!store || !store.weeklyData) {
         return { plan: 0, fact: 0, percent: 0, losses: 0, shortages: 0, fop: 0, shiftRemainder: 0, unprocessed: 0 }
@@ -279,26 +382,20 @@ export default {
       return weekData || { plan: 0, fact: 0, percent: 0, losses: 0, shortages: 0, fop: 0, shiftRemainder: 0, unprocessed: 0 }
     }
 
-    // Получение общего плана для региона (сумма по всем неделям)
-    const getTotalPlanForRegion = (region) => {
-      if (!region || !region.weeklyData) return 0
-      return region.weeklyData.reduce((sum, week) => sum + (week.plan || 0), 0)
-    }
+    const getTotalPercentForStore = (store) => {
+      if (!store || !store.weeklyData) return 0
 
-    // Получение общего факта для региона (сумма по всем неделям)
-    const getTotalFactForRegion = (region) => {
-      if (!region || !region.weeklyData) return 0
-      return region.weeklyData.reduce((sum, week) => sum + (week.fact || 0), 0)
-    }
+      let totalPlan = 0
+      let totalFact = 0
 
-    // Получение общего процента для региона
-    const getTotalPercentForRegion = (region) => {
-      const totalPlan = getTotalPlanForRegion(region)
-      const totalFact = getTotalFactForRegion(region)
+      store.weeklyData.forEach(week => {
+        totalPlan += week.plan || 0
+        totalFact += week.fact || 0
+      })
+
       return totalPlan > 0 ? Math.round((totalFact / totalPlan) * 100) : 0
     }
 
-    // Получение всех магазинов без группировки по регионам
     const getAllSortedStores = () => {
       const allStores = []
 
@@ -307,77 +404,24 @@ export default {
         stores.forEach(store => {
           allStores.push({
             ...store,
-            regionColor: region.color,
-            regionScore: region.totalScore,
             regionName: region.name
           })
         })
       })
 
-      // Сортировка всех магазинов
-      if (sortBy.value.startsWith('store')) {
+      if (sortBy.value === 'storePercent') {
         allStores.sort((a, b) => {
-          let aValue, bValue
-
-          switch (sortBy.value) {
-            case 'storeName':
-              aValue = a.name || ''
-              bValue = b.name || ''
-              break
-            case 'storePlan':
-              aValue = getTotalPlanForStore(a)
-              bValue = getTotalPlanForStore(b)
-              break
-            case 'storeFact':
-              aValue = getTotalFactForStore(a)
-              bValue = getTotalFactForStore(b)
-              break
-            case 'storePercent':
-              aValue = getTotalPercentForStore(a)
-              bValue = getTotalPercentForStore(b)
-              break
-            default:
-              return 0
-          }
-
-          if (typeof aValue === 'string') {
-            return sortOrder.value === 'asc'
-              ? aValue.localeCompare(bValue)
-              : bValue.localeCompare(aValue)
-          } else {
-            return sortOrder.value === 'asc'
-              ? aValue - bValue
-              : bValue - aValue
-          }
+          const aPercent = getTotalPercentForStore(a)
+          const bPercent = getTotalPercentForStore(b)
+          return sortOrder.value === 'asc' ? aPercent - bPercent : bPercent - aPercent
         })
       } else {
-        // Сортировка по умолчанию по рангу
         allStores.sort((a, b) => (a.rank || 0) - (b.rank || 0))
       }
 
       return allStores
     }
 
-    // Получение общего плана для магазина
-    const getTotalPlanForStore = (store) => {
-      if (!store || !store.weeklyData) return 0
-      return store.weeklyData.reduce((sum, week) => sum + (week.plan || 0), 0)
-    }
-
-    // Получение общего факта для магазина
-    const getTotalFactForStore = (store) => {
-      if (!store || !store.weeklyData) return 0
-      return store.weeklyData.reduce((sum, week) => sum + (week.fact || 0), 0)
-    }
-
-    // Получение общего процента для магазина
-    const getTotalPercentForStore = (store) => {
-      const totalPlan = getTotalPlanForStore(store)
-      const totalFact = getTotalFactForStore(store)
-      return totalPlan > 0 ? Math.round((totalFact / totalPlan) * 100) : 0
-    }
-
-    // Утилитарные функции
     const formatNumber = (number) => {
       if (number === null || number === undefined || isNaN(number)) {
         return '0'
@@ -403,16 +447,11 @@ export default {
       return 'danger'
     }
 
-    // Состояние анимации
-    const isAnimating = ref(false)
-
-    // Обработчики событий
     const handleSort = () => {
-      // Добавляем индикацию анимации
       isAnimating.value = true
       setTimeout(() => {
         isAnimating.value = false
-      }, 600) // Длительность анимации
+      }, 600)
     }
 
     const toggleSortOrder = () => {
@@ -442,6 +481,8 @@ export default {
       isAnimating,
       colors,
       getRegionWeekData,
+      getRegionTotalScore,
+      getRegionRank,
       getStoreWeekData,
       getAllSortedStores,
       formatNumber,
@@ -450,15 +491,15 @@ export default {
       handleSort,
       toggleSortOrder,
       refreshData,
-      loadData
+      loadData,
+      showPlanFactColumns,
+      toggleColumn
     }
   }
 }
 </script>
 
 <style scoped>
-
-
 .total_tbody {
   text-align: center;
 }
@@ -588,11 +629,11 @@ export default {
 }
 
 .week-group {
-    /* background: #6c757d !important; */
-    color: rgb(50, 128, 201)!important;
-    font-weight: 700;
-    font-size: 20px;
-  }
+  /* background: #6c757d !important; */
+  color: rgb(50, 128, 201) !important;
+  font-weight: 700;
+  font-size: 20px;
+}
 
 .revenue-group {
   background: #17a2b8 !important;
@@ -601,6 +642,7 @@ export default {
 .plan-column,
 .fact-column {
   width: 80px;
+  transition: opacity 0.3s ease;
 }
 
 .percent-column {
@@ -1094,7 +1136,7 @@ export default {
 /* Улучшенные hover эффекты для строк */
 .region-row,
 .store-row {
-  transition: all 0.11s ease;
+  transition: all .5s ease;
   transform-origin: center;
 }
 
@@ -1270,4 +1312,7 @@ export default {
     backface-visibility: hidden;
   }
 } */
+
+
+
 </style>
