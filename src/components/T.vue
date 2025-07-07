@@ -13,9 +13,9 @@
           <option value="storePercent">Магазины по % выполнения</option>
         </select>
 
-        <!-- <button @click="toggleSortOrder" class="sort-order-btn" :class="{ 'animating': isAnimating }">
+        <button @click="toggleSortOrder" class="sort-order-btn" :class="{ 'animating': isAnimating }">
           {{ sortOrder === 'asc' ? '↑' : '↓' }}
-        </button> -->
+        </button>
 
         <!-- <button @click="refreshData" class="refresh-btn" :disabled="loading || isAnimating">
           🔄 Обновить
@@ -38,7 +38,8 @@
           <tr>
             <th style="width: 230px;" rowspan="3" class="store-name-column">Регион / Магазин</th>
 
-            <th v-for="week in weeks" :key="week.id" :colspan="11" class="week-group">{{ week.name }}  ({{ week.dateRange }})</th>
+            <th v-for="week in weeks" :key="week.id" :colspan="11" class="week-group">{{ week.name }} ({{ week.dateRange
+              }})</th>
             <th v-for="week in weeks" :key="week.id" :colspan="showPlanFactColumns ? 11 : 9" class="week-group"></th>
           </tr>
           <tr>
@@ -47,7 +48,8 @@
 
               <!-- <th colspan="4" class="metric-header">Виторг</th> -->
 
-              <th :colspan="showPlanFactColumns ? 4 : 2" class="metric-header">Виторг <span @click="showPlanFactColumns = !showPlanFactColumns" class="add">+/-</span> </th>
+              <th :colspan="showPlanFactColumns ? 4 : 2" class="metric-header">Виторг <span
+                  @click="showPlanFactColumns = !showPlanFactColumns" class="add">+/-</span> </th>
 
               <th rowspan="2" class="metric-header">Втрати<br>Списання</th>
               <th rowspan="2" class="metric-header">Недостачі</th>
@@ -63,7 +65,7 @@
               <th class="score-current">100</th>
 
               <th v-if="showPlanFactColumns" class="plan-column">План</th>
-               
+
               <!-- <div class="city-cell">План</div> -->
 
 
@@ -206,11 +208,11 @@ export default {
     const isAnimating = ref(false)
     const showPlanFactColumns = ref(true)
 
-const showColumn = ref(true)
+    const showColumn = ref(true)
 
-const toggleColumn = () => {
-  showColumn.value = !showColumn.value
-}
+    const toggleColumn = () => {
+      showColumn.value = !showColumn.value
+    }
 
     const colors = ref({
       'Белая Церковь': '#f44336',
@@ -480,6 +482,7 @@ const toggleColumn = () => {
       sortOrder,
       isAnimating,
       colors,
+      showPlanFactColumns,
       getRegionWeekData,
       getRegionTotalScore,
       getRegionRank,
@@ -492,7 +495,6 @@ const toggleColumn = () => {
       toggleSortOrder,
       refreshData,
       loadData,
-      showPlanFactColumns,
       toggleColumn
     }
   }
@@ -1312,7 +1314,4 @@ const toggleColumn = () => {
     backface-visibility: hidden;
   }
 } */
-
-
-
 </style>
