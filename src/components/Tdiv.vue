@@ -575,9 +575,6 @@ export default {
   /* padding: 0 20px; */
 }
 
-/* Заголовки таблицы */
-/* Заголовки таблицы */
-
 .table-header {
   position: sticky;
   top: 0;
@@ -699,8 +696,6 @@ export default {
   justify-content: center;
 } */
 
-/* Тело таблицы */
-/* Тело таблицы */
 .table-body {
   min-height: 100px;
 }
@@ -729,7 +724,6 @@ export default {
   font-size: 12px;
 }
 
-/* Стили для различных типов ячеек */
 .region-name,
 .store-name {
   justify-content: flex-start;
@@ -813,7 +807,7 @@ export default {
     /* 60px 60px 70px v-bind('showPlanFactColumns ? "90px 90px" : ""') 60px 80px 80px 80px 60px 70px); */
 }
 
-/* Разделитель между таблицами */
+/* Разделитель */
 .table-separator {
   height: 15px;
   background: #f5f5f5;
@@ -826,7 +820,6 @@ export default {
   transition: all 0.3s ease;
 }
 
-/* Фиксированная grid-структура всегда с 11 колонками на неделю */
 .table-header,
 .data-row {
   display: grid;
@@ -964,22 +957,10 @@ export default {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 .table-container {
   width: 100%;
   min-height: 100vh;
-  max-width: 1900px;
+  /* max-width: 1900px; */
   min-width: 1300px;
   margin: 0 auto;
   padding: 0 20px;
@@ -1036,7 +1017,6 @@ export default {
 }
 
 .h_toggle {
-  /* position: relative; */
   display: flex;
   align-items: center;
   justify-content: left;
@@ -1058,11 +1038,11 @@ export default {
   width: 15px;
   height: 15px;
   color: white;
-  /* padding: 1px; */
+
   background-color: white;
 }
 
-/* Улучшенные hover эффекты для строк */
+
 .region-row,
 .store-row {
   transition: all .5s ease;
