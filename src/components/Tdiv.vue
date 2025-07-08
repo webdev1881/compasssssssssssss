@@ -571,8 +571,11 @@ export default {
       const baseColumns = '230px'
       const weekColumns = []
 
+      console.log(weekColumns);
+      
+
       weeks.value.forEach(week => {
-        const columnCount = showPlanFactColumns.value[week.id] ? 11 : 11
+        const columnCount = showPlanFactColumns.value[week.id] ? 7 : 11
         for (let i = 0; i < columnCount; i++) {
           weekColumns.push('1fr')
         }
@@ -587,10 +590,10 @@ export default {
 
       // Считаем колонки предыдущих недель
       for (let i = 0; i < weekIndex; i++) {
-        position += showPlanFactColumns.value[weeks.value[i].id] ? 11 : 9
+        position += showPlanFactColumns.value[weeks.value[i].id] ? 7 : 11
       }
 
-      return position + columnIndex -1
+      return position + columnIndex
     }
 
 
@@ -1029,10 +1032,10 @@ export default {
 
 
 
-.table-container {
+.sales-table-container {
   width: 100%;
   min-height: 100vh;
-  /* max-width: 1900px; */
+  max-width: 1900px;
   min-width: 1300px;
   margin: 0 auto;
   padding: 0 20px;
