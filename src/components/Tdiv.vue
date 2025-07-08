@@ -1,6 +1,6 @@
 <template>
   <div class="sales-table-container table-container">
-    <!-- {{ loading  }} --> 
+    <!-- {{ loading  }} -->
     <div v-if="loading" class="loading-bar">
       <div style="color: white;" class="loading-progress">_</div>
     </div>
@@ -21,15 +21,15 @@
             {{ sortOrder === 'asc' ? '↑' : '↓' }}
           </button> -->
 
-          
+
           <!-- <button @click="showPlanFactColumns = !showPlanFactColumns" class="toggle-columns-btn">
             {{ showPlanFactColumns ? '👁️ Скрыть План/Факт' : '👁️‍🗨️ Показать План/Факт' }}
           </button> -->
-          
+
           <!-- <button @click="toggleColumn = !toggleColumn" class="toggle-columns-btn">
             {{ toggleColumn ? '👁️ Скрыть План/Факт' : '👁️‍🗨️ Показать План/Факт' }}
           </button> -->
-          
+
         </div>
         <button @click="refreshData" class="refresh-btn" :disabled="loading || isAnimating">
           Обновить
@@ -40,7 +40,7 @@
 
         <div class="custom-table" :class="{ 'hide-plan-fact': !showPlanFactColumns }">
 
-          <div class="table-header">
+          <div class="table-header" :style="{ gridTemplateColumns: gridTemplateColumns }">
             <!-- Все ячейки заголовков в одной сетке -->
             <div class="header-cell store-name-column">Регион / Магазин</div>
 
@@ -59,10 +59,50 @@
 
               <div class="header-cell metric-header h_toggle"
                 :style="`grid-column: ${4 + weekIndex * (showPlanFactColumns ? 11 : 9)} / span ${showPlanFactColumns ? 4 : 2}; grid-row: 2;`">
-                 <div class="vtrg">Виторг<span class="togler">
-                   <svg @click="showPlanFactColumns = !showPlanFactColumns" v-if="!showPlanFactColumns" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns" fill="#555555" stroke="#555555"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>plus-square</title> <desc>Created with Sketch Beta.</desc> <defs> </defs> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage"> <g id="Icon-Set-Filled" sketch:type="MSLayerGroup" transform="translate(-102.000000, -1037.000000)" fill="#1976d2"> <path d="M124,1054 L119,1054 L119,1059 C119,1059.55 118.552,1060 118,1060 C117.448,1060 117,1059.55 117,1059 L117,1054 L112,1054 C111.448,1054 111,1053.55 111,1053 C111,1052.45 111.448,1052 112,1052 L117,1052 L117,1047 C117,1046.45 117.448,1046 118,1046 C118.552,1046 119,1046.45 119,1047 L119,1052 L124,1052 C124.552,1052 125,1052.45 125,1053 C125,1053.55 124.552,1054 124,1054 L124,1054 Z M130,1037 L106,1037 C103.791,1037 102,1038.79 102,1041 L102,1065 C102,1067.21 103.791,1069 106,1069 L130,1069 C132.209,1069 134,1067.21 134,1065 L134,1041 C134,1038.79 132.209,1037 130,1037 L130,1037 Z" id="plus-square" sketch:type="MSShapeGroup"> </path> </g> </g> </g></svg>
-                   <svg @click="showPlanFactColumns = !showPlanFactColumns" v-if="showPlanFactColumns" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>minus-square</title> <desc>Created with Sketch Beta.</desc> <defs> </defs> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage"> <g id="Icon-Set-Filled" sketch:type="MSLayerGroup" transform="translate(-154.000000, -1037.000000)" fill="#1976d2"> <path d="M176,1054 L164,1054 C163.448,1054 163,1053.55 163,1053 C163,1052.45 163.448,1052 164,1052 L176,1052 C176.552,1052 177,1052.45 177,1053 C177,1053.55 176.552,1054 176,1054 L176,1054 Z M182,1037 L158,1037 C155.791,1037 154,1038.79 154,1041 L154,1065 C154,1067.21 155.791,1069 158,1069 L182,1069 C184.209,1069 186,1067.21 186,1065 L186,1041 C186,1038.79 184.209,1037 182,1037 L182,1037 Z" id="minus-square" sketch:type="MSShapeGroup"> </path> </g> </g> </g></svg>
-                </span></div> 
+                <div class="vtrg">Виторг<span class="togler">
+                    <svg @click="showPlanFactColumns = !showPlanFactColumns" v-if="!showPlanFactColumns"
+                      viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg"
+                      xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns"
+                      fill="#555555" stroke="#555555">
+                      <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                      <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                      <g id="SVGRepo_iconCarrier">
+                        <title>plus-square</title>
+                        <desc>Created with Sketch Beta.</desc>
+                        <defs> </defs>
+                        <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"
+                          sketch:type="MSPage">
+                          <g id="Icon-Set-Filled" sketch:type="MSLayerGroup"
+                            transform="translate(-102.000000, -1037.000000)" fill="#1976d2">
+                            <path
+                              d="M124,1054 L119,1054 L119,1059 C119,1059.55 118.552,1060 118,1060 C117.448,1060 117,1059.55 117,1059 L117,1054 L112,1054 C111.448,1054 111,1053.55 111,1053 C111,1052.45 111.448,1052 112,1052 L117,1052 L117,1047 C117,1046.45 117.448,1046 118,1046 C118.552,1046 119,1046.45 119,1047 L119,1052 L124,1052 C124.552,1052 125,1052.45 125,1053 C125,1053.55 124.552,1054 124,1054 L124,1054 Z M130,1037 L106,1037 C103.791,1037 102,1038.79 102,1041 L102,1065 C102,1067.21 103.791,1069 106,1069 L130,1069 C132.209,1069 134,1067.21 134,1065 L134,1041 C134,1038.79 132.209,1037 130,1037 L130,1037 Z"
+                              id="plus-square" sketch:type="MSShapeGroup"> </path>
+                          </g>
+                        </g>
+                      </g>
+                    </svg>
+                    <svg @click="showPlanFactColumns = !showPlanFactColumns" v-if="showPlanFactColumns"
+                      viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg"
+                      xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns"
+                      fill="#000000">
+                      <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                      <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                      <g id="SVGRepo_iconCarrier">
+                        <title>minus-square</title>
+                        <desc>Created with Sketch Beta.</desc>
+                        <defs> </defs>
+                        <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"
+                          sketch:type="MSPage">
+                          <g id="Icon-Set-Filled" sketch:type="MSLayerGroup"
+                            transform="translate(-154.000000, -1037.000000)" fill="#1976d2">
+                            <path
+                              d="M176,1054 L164,1054 C163.448,1054 163,1053.55 163,1053 C163,1052.45 163.448,1052 164,1052 L176,1052 C176.552,1052 177,1052.45 177,1053 C177,1053.55 176.552,1054 176,1054 L176,1054 Z M182,1037 L158,1037 C155.791,1037 154,1038.79 154,1041 L154,1065 C154,1067.21 155.791,1069 158,1069 L182,1069 C184.209,1069 186,1067.21 186,1065 L186,1041 C186,1038.79 184.209,1037 182,1037 L182,1037 Z"
+                              id="minus-square" sketch:type="MSShapeGroup"> </path>
+                          </g>
+                        </g>
+                      </g>
+                    </svg>
+                  </span></div>
               </div>
 
               <div class="header-cell metric-header"
@@ -119,7 +159,7 @@
 
           <div class="table-body regions-body">
             <transition-group name="table-row" tag="div" class="transition-wrapper">
-              <div v-for="region in sortedRegions" :key="`region-${region.id}`" class="data-row region-row">
+              <div v-for="region in sortedRegions" :key="`region-${region.id}`" :style="{ gridTemplateColumns: gridTemplateColumns }" class="data-row region-row">
                 <div class="data-cell region-name">
                   <div class="region-info">
                     <span class="region-indicator" :style="{ backgroundColor: colors[region.name] }"></span>
@@ -132,7 +172,8 @@
                   <!-- <div class="data-cell score-max">{{ getRegionTotalScore(region).max }}</div>
                   <div class="data-cell score-current" :class="getScoreClass(getRegionTotalScore(region).current)">{{ getRegionTotalScore(region).current }}</div> -->
                   <div class="data-cell score-max">{{ 55 }}</div>
-                  <div class="data-cell score-current" :class="getScoreClass(getRegionTotalScore(region).current)">{{ 85 }}</div>
+                  <div class="data-cell score-current" :class="getScoreClass(getRegionTotalScore(region).current)">{{ 85
+                  }}</div>
 
 
                   <!-- 
@@ -175,7 +216,7 @@
 
             <div class="table-body stores-body">
               <transition-group name="table-row" tag="div" class="transition-wrapper">
-                <div v-for="store in getAllSortedStores()" :key="`store-${store.id}`" class="data-row store-row">
+                <div v-for="store in getAllSortedStores()" :key="`store-${store.id}`" :style="{ gridTemplateColumns: gridTemplateColumns }" class="data-row store-row">
                   <!-- {{ store }} -->
                   <div class="data-cell store-name">
                     <div class="store-info">
@@ -256,7 +297,6 @@
 </template>
 
 <script>
-import { lo } from 'element-plus/es/locales.mjs'
 import { ref, computed, onMounted } from 'vue'
 
 export default {
@@ -525,6 +565,36 @@ export default {
       }, 600)
     }
 
+
+
+    const gridTemplateColumns = computed(() => {
+      const baseColumns = '230px'
+      const weekColumns = []
+
+      weeks.value.forEach(week => {
+        const columnCount = showPlanFactColumns.value[week.id] ? 11 : 11
+        for (let i = 0; i < columnCount; i++) {
+          weekColumns.push('1fr')
+        }
+      })
+
+      return `${baseColumns} ${weekColumns.join(' ')}`
+    })
+
+
+    const getColumnPosition = (weekIndex, columnIndex) => {
+      let position = 2 // После первой колонки (Регион/Магазин)
+
+      // Считаем колонки предыдущих недель
+      for (let i = 0; i < weekIndex; i++) {
+        position += showPlanFactColumns.value[weeks.value[i].id] ? 11 : 9
+      }
+
+      return position + columnIndex -1
+    }
+
+
+
     const refreshData = async () => {
       await loadData()
     }
@@ -544,6 +614,8 @@ export default {
       isAnimating,
       colors,
       showPlanFactColumns,
+      gridTemplateColumns,
+      getColumnPosition,
       getRegionWeekData,
       getRegionTotalScore,
       getRegionRank,
@@ -563,7 +635,6 @@ export default {
 </script>
 
 <style scoped>
-/* Основная структура таблицы */
 .custom-table {
   background: white;
   border-radius: 4px;
@@ -582,7 +653,7 @@ export default {
   background: white;
   display: grid;
   grid-template-rows: auto auto auto;
-  grid-template-columns: 230px repeat(v-bind('weeks.length * (showPlanFactColumns ? 11 : 7)'), 1fr);
+  /* grid-template-columns: 230px repeat(v-bind('weeks.length * (showPlanFactColumns ? 11 : 7)'), 1fr); */
 }
 
 .store-name-column {
@@ -607,7 +678,7 @@ export default {
 .data-row {
   display: grid;
   font-size: 12px;
-  grid-template-columns: 230px repeat(v-bind('weeks.length * (showPlanFactColumns ? 11 : 7)'), 1fr),
+  /* grid-template-columns: 230px repeat(v-bind('weeks.length * (showPlanFactColumns ? 11 : 7)'), 1fr), */
     /* 60px 60px 70px v-bind('showPlanFactColumns ? "90px 90px" : ""') 60px 80px 80px 80px 60px 70px); */
 }
 
@@ -702,7 +773,7 @@ export default {
 
 .data-row {
   display: grid;
-  grid-template-columns: 230px repeat(v-bind('weeks.length * (showPlanFactColumns ? 11 : 7)'), 1fr);
+  /* grid-template-columns: 230px repeat(v-bind('weeks.length * (showPlanFactColumns ? 11 : 7)'), 1fr); */
   border-bottom: 1px solid #e0e0e0;
   transition: all 0.3s ease;
 }
@@ -803,7 +874,7 @@ export default {
 
 /* Динамическая сетка в зависимости от showPlanFactColumns */
 .data-row {
-  grid-template-columns: 230px repeat(v-bind('weeks.length * (showPlanFactColumns ? 11 : 7)'), 1fr),
+  /* grid-template-columns: 230px repeat(v-bind('weeks.length * (showPlanFactColumns ? 11 : 7)'), 1fr), */
     /* 60px 60px 70px v-bind('showPlanFactColumns ? "90px 90px" : ""') 60px 80px 80px 80px 60px 70px); */
 }
 
@@ -823,7 +894,7 @@ export default {
 .table-header,
 .data-row {
   display: grid;
-  grid-template-columns: 230px repeat(v-bind('weeks.length * (showPlanFactColumns ? 11 : 9)'), 1fr);
+  /* grid-template-columns: 230px repeat(v-bind('weeks.length * (showPlanFactColumns ? 11 : 9)'), 1fr); */
 }
 
 
@@ -898,6 +969,7 @@ export default {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
 }
+
 .sorting-controls {
   display: flex;
   align-items: center;
@@ -1012,6 +1084,7 @@ export default {
     transform: translateY(0);
   }
 }
+
 .h_rang {
   min-width: 54px;
 }
@@ -1056,30 +1129,4 @@ export default {
   z-index: 10;
   position: relative;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 </style>
-
-
-
-
-
-
-
-
-
-
