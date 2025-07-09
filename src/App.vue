@@ -3,6 +3,7 @@
     <!-- <TableComponent /> -->
     <!-- <Tt /> -->
     <Tdiv />
+    <Tdiv2 />
     <!-- <T /> -->
     <!-- <TableComponent0 /> -->
   </div>
@@ -13,6 +14,7 @@ import TableComponent from './components/TableComponent.vue'
 import TableComponent0 from './components/TableComponent0.vue'
 import T from './components/T.vue'
 import Tdiv from './components/Tdiv.vue'
+import Tdiv2 from './components/Tdiv2.vue'
 import Tt from './components/Tt.vue'
 
 export default {
@@ -22,6 +24,7 @@ export default {
     TableComponent0,
     T,
     Tdiv,
+    Tdiv2,
     Tt,
   }
 }

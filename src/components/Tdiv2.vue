@@ -1,10 +1,12 @@
 <template>
   <div class="sales-table-container table-container">
+    <!-- {{ loading  }} -->
     <div v-if="loading" class="loading-bar">
       <div style="color: white;" class="loading-progress">_</div>
     </div>
 
     <div v-else class="content">
+
 
       <div class="controls-panel" v-if="!loading && !error">
         <div class="sorting-controls">
@@ -14,6 +16,19 @@
             <option value="regionTotalPercent">Регионы по % выполнения</option>
             <option value="storePercent">Магазины по % выполнения</option>
           </select>
+
+          <!-- <button @click="toggleSortOrder" class="sort-order-btn" :class="{ 'animating': isAnimating }">
+            {{ sortOrder === 'asc' ? '↑' : '↓' }}
+          </button> -->
+
+
+          <!-- <button @click="showPlanFactColumns = !showPlanFactColumns" class="toggle-columns-btn">
+            {{ showPlanFactColumns ? '👁️ Скрыть План/Факт' : '👁️‍🗨️ Показать План/Факт' }}
+          </button> -->
+
+          <!-- <button @click="toggleColumn = !toggleColumn" class="toggle-columns-btn">
+            {{ toggleColumn ? '👁️ Скрыть План/Факт' : '👁️‍🗨️ Показать План/Факт' }}
+          </button> -->
 
         </div>
         <button @click="refreshData" class="refresh-btn" :disabled="loading || isAnimating">
@@ -26,14 +41,16 @@
         <div class="custom-table" :class="{ 'hide-plan-fact': !showPlanFactColumns }">
 
           <div class="table-header" :style="{ gridTemplateColumns: gridTemplateColumns }">
+            <!-- Все ячейки заголовков в одной сетке -->
             <div class="header-cell store-name-column">Регион / Магазин</div>
 
+            <!-- Первый уровень - недели -->
             <div v-for="(week, weekIndex) in weeks" :key="'week1-' + week.id" class="header-cell week-group"
               :style="`grid-column: ${2 + weekIndex * (showPlanFactColumns ? 11 : 9)} / span ${showPlanFactColumns ? 11 : 9}; grid-row: 1;`">
               {{ week.name }} ({{ week.dateRange }})
             </div>
 
-
+            <!-- Второй уровень -->
             <template v-for="(week, weekIndex) in weeks" :key="'week2-' + week.id">
               <div class="header-cell metric-header "
                 :style="`grid-column: ${2 + weekIndex * (showPlanFactColumns ? 11 : 9)} / span 2; grid-row: 2;`">
@@ -88,11 +105,11 @@
                   </span></div>
               </div>
 
-              <div class="header-cell metric-header h_loss"
-                :style="`grid-column: ${(showPlanFactColumns ? 8 : 6) + weekIndex * (showPlanFactColumns ? 11 : 9)}; grid-row: 2 / 4;`">
+              <div class="header-cell metric-header"
+                :style="`grid-column: ${(showPlanFactColumns ? 8 : 6) + weekIndex * (showPlanFactColumns ? 11 : 7)}; grid-row: 2 / 4;`">
                 Втрати<br>Списання
               </div>
-              <div class="header-cell metric-header h_short"
+              <div class="header-cell metric-header"
                 :style="`grid-column: ${(showPlanFactColumns ? 9 : 7) + weekIndex * (showPlanFactColumns ? 11 : 9)}; grid-row: 2 / 4;`">
                 Недостачі
               </div>
@@ -100,17 +117,17 @@
                 :style="`grid-column: ${(showPlanFactColumns ? 10 : 8) + weekIndex * (showPlanFactColumns ? 11 : 9)}; grid-row: 2 / 4;`">
                 ФОП
               </div>
-              <div class="header-cell metric-header h_minus"
+              <div class="header-cell metric-header"
                 :style="`grid-column: ${(showPlanFactColumns ? 11 : 9) + weekIndex * (showPlanFactColumns ? 11 : 9)}; grid-row: 2 / 4;`">
                 Від'ємні<br>залишки
               </div>
-              <div class="header-cell metric-header h_spys"
+              <div class="header-cell metric-header"
                 :style="`grid-column: ${(showPlanFactColumns ? 12 : 10) + weekIndex * (showPlanFactColumns ? 11 : 9)}; grid-row: 2 / 4;`">
                 Не проведені<br>списання
               </div>
             </template>
 
-            <!-- Третий  -->
+            <!-- Третий уровень -->
             <template v-for="(week, weekIndex) in weeks" :key="'week3-' + week.id">
               <div class="header-cell sub-header h_rang"
                 :style="`grid-column: ${2 + weekIndex * (showPlanFactColumns ? 11 : 9)}; grid-row: 3;`">
@@ -143,7 +160,7 @@
           <div class="table-body regions-body">
             <transition-group name="table-row" tag="div" class="transition-wrapper">
               <div v-for="region in sortedRegions" :key="`region-${region.id}`"
-                 :style="{ gridTemplateColumns: gridTemplateColumns }" class="data-row region-row">
+                :style="{ gridTemplateColumns: gridTemplateColumns }" class="data-row region-row">
                 <div class="data-cell region-name">
                   <div class="region-info">
                     <span class="region-indicator" :style="{ backgroundColor: colors[region.name] }"></span>
@@ -151,17 +168,45 @@
                   </div>
                 </div>
                 <template v-for="week in weeks" :key="week.id">
-                  <div class="data-cell region-rank" :style="`grid-column: ${2+(showPlanFactColumns ? 11 : 9)-(showPlanFactColumns ? 11 : 9)}; grid-row: 1;`">{{ getRegionRank(region) }}</div>
-                  <!-- <div class="data-cell score-max" :style="`grid-column: ${3 + weekIndex * (showPlanFactColumns ? 11 : 9)}; grid-row: 1;`">{{ 55 }}</div> -->
-                  <!-- <div class="data-cell score-current" :style="`grid-column: ${4 + weekIndex * (showPlanFactColumns ? 11 : 9)}; grid-row: 1;`" :class="getScoreClass(getRegionTotalScore(region).current)">{{ 85}}</div> -->
-                  <!-- <div class="data-cell plan plan-column" :style="`grid-column: ${5 + weekIndex * (showPlanFactColumns ? 11 : 9)}; grid-row: 1;`">{{ formatNumber(getRegionWeekData(region, week.id).plan) }}</div> -->
-                  <!-- <div class="data-cell fact fact-column" :style="`grid-column: ${6 + weekIndex * (showPlanFactColumns ? 11 : 9)}; grid-row: 1;`">{{ formatNumber(getRegionWeekData(region, week.id).fact) }}</div> -->
-                  <!-- <div class="data-cell percent" :style="`grid-column: ${7 + weekIndex * (showPlanFactColumns ? 11 : 9)}; grid-row: 1;`" :class="getPercentClass(getRegionWeekData(region, week.id).percent)">{{ getRegionWeekData(region, week.id).percent }}%</div> -->
-                  <!-- <div class="data-cell losses" :style="`grid-column: ${1+ (showPlanFactColumns ? 11 : 9)}; grid-row: 1;`">{{ formatNumber(getRegionWeekData(region, week.id).losses) }}</div> -->
-                  <!-- <div class="data-cell shortages">{{ formatNumber(getRegionWeekData(region, week.id).shortages) }}</div> -->
-                  <!-- <div class="data-cell fop" :style="`grid-column: ${(showPlanFactColumns ? 11 : 9)}; grid-row: 1;`">{{ formatNumber(getRegionWeekData(region, week.id).fop) }}</div> -->
-                  <!-- <div class="data-cell shift" :style="`grid-column: ${18-(showPlanFactColumns ? 11 : 9)}; grid-row: 1;`"><span v-if="getRegionWeekData(region, week.id).shiftRemainder" class="status-value negative">{{ getRegionWeekData(region, week.id).shiftRemainder }}</span><span v-else class="status-value">-</span></div> -->
-                  <!-- <div class="data-cell unprocessed" :style="`grid-column: ${(showPlanFactColumns ? 11 : 9)}; grid-row: 1;`"><span v-if="getRegionWeekData(region, week.id).unprocessed" class="status-value negative">{{ getRegionWeekData(region, week.id).unprocessed }}</span><span v-else class="status-value">-</span></div> -->
+                  <div class="data-cell region-rank">{{ getRegionRank(region) }}</div>
+
+                  <!-- <div class="data-cell score-max">{{ getRegionTotalScore(region).max }}</div>
+                  <div class="data-cell score-current" :class="getScoreClass(getRegionTotalScore(region).current)">{{ getRegionTotalScore(region).current }}</div> -->
+                  <div class="data-cell score-max">{{ 55 }}</div>
+                  <div class="data-cell score-current" :class="getScoreClass(getRegionTotalScore(region).current)">{{ 85
+                  }}</div>
+
+
+                  <!-- 
+                <div v-if="showPlanFactColumns" class="data-cell plan">{{ formatNumber(getRegionWeekData(region,
+                  week.id).plan) }}</div>
+                <div v-if="showPlanFactColumns" class="data-cell fact">{{ formatNumber(getRegionWeekData(region,
+                  week.id).fact) }}</div> -->
+
+                  <div class="data-cell plan plan-column">{{ formatNumber(getRegionWeekData(region, week.id).plan) }}
+                  </div>
+                  <div class="data-cell fact fact-column">{{ formatNumber(getRegionWeekData(region, week.id).fact) }}
+                  </div>
+
+                  <div class="data-cell percent" :class="getPercentClass(getRegionWeekData(region, week.id).percent)">
+                    {{ getRegionWeekData(region, week.id).percent }}%
+                  </div>
+                  <div class="data-cell losses">{{ formatNumber(getRegionWeekData(region, week.id).losses) }}</div>
+                  <div class="data-cell shortages">{{ formatNumber(getRegionWeekData(region, week.id).shortages) }}
+                  </div>
+                  <div class="data-cell fop">{{ formatNumber(getRegionWeekData(region, week.id).fop) }}</div>
+                  <div class="data-cell shift">
+                    <span v-if="getRegionWeekData(region, week.id).shiftRemainder" class="status-value negative">
+                      {{ getRegionWeekData(region, week.id).shiftRemainder }}
+                    </span>
+                    <span v-else class="status-value">-</span>
+                  </div>
+                  <div class="data-cell unprocessed">
+                    <span v-if="getRegionWeekData(region, week.id).unprocessed" class="status-value negative">
+                      {{ getRegionWeekData(region, week.id).unprocessed }}
+                    </span>
+                    <span v-else class="status-value">-</span>
+                  </div>
                 </template>
               </div>
             </transition-group>
@@ -184,10 +229,23 @@
                   </div>
                   <template v-for="week in weeks" :key="week.id">
                     <div class="data-cell store-rank">{{ store.rank }}</div>
+
+                    <!-- <div class="data-cell score-max">{{ store.totalScore.max }}</div> -->
+                    <!-- <div class="data-cell score-current" :class="getScoreClass(store.totalScore.current)">{{ store.totalScore.current }}</div> -->
                     <div class="data-cell score-max">{{ 88 }}</div>
                     <div class="data-cell score-current">{{ 99 }}</div>
-                    <div class="data-cell plan plan-column">{{ formatNumber(getStoreWeekData(store, week.id).plan) }}</div>
-                    <div class="data-cell fact fact-column">{{ formatNumber(getStoreWeekData(store, week.id).fact) }}</div>
+
+                    <!-- <div v-if="showPlanFactColumns" class="data-cell plan">{{ formatNumber(getStoreWeekData(store,
+                    week.id).plan) }}</div>
+                  <div v-if="showPlanFactColumns" class="data-cell fact">{{ formatNumber(getStoreWeekData(store,
+                    week.id).fact) }}</div> -->
+
+                    <div class="data-cell plan plan-column">{{ formatNumber(getStoreWeekData(store, week.id).plan) }}
+                    </div>
+                    <div class="data-cell fact fact-column">{{ formatNumber(getStoreWeekData(store, week.id).fact) }}
+                    </div>
+
+
                     <div class="data-cell percent" :class="getPercentClass(getStoreWeekData(store, week.id).percent)">
                       {{ getStoreWeekData(store, week.id).percent }}%
                     </div>
@@ -211,11 +269,23 @@
                 </div>
               </transition-group>
             </div>
+
+
+
+
           </div>
+
 
         </div>
 
+
       </div>
+
+
+      <!-- <div v-else-if="loading" class="loading">
+        <div class="loading-spinner"></div>
+        <p>Загрузка данных...</p>
+      </div> -->
 
       <div v-else-if="error" class="error">
         <div class="error-icon">⚠️</div>
@@ -240,7 +310,7 @@ export default {
     const sortBy = ref('regionRank')
     const sortOrder = ref('asc')
     const isAnimating = ref(false)
-    const showPlanFactColumns = ref(false)
+    const showPlanFactColumns = ref(true)
 
     const showColumn = ref(true)
 
@@ -271,11 +341,13 @@ export default {
           throw new Error('Неверная структура данных')
         }
 
+
+
         setTimeout(() => {
-        }, 400)
-        
-        salesData.value = data
-        loading.value = false
+          salesData.value = data
+          loading.value = false
+        }, 300)
+
 
       } catch (err) {
         console.error('Ошибка загрузки данных:', err)
@@ -498,18 +570,15 @@ export default {
 
 
     const gridTemplateColumns = computed(() => {
-      
-      const totalColumns = weeks.value.length * (showPlanFactColumns ? 11 : 9)
-      console.log(totalColumns);
-      return `240px repeat(${totalColumns}, 1fr)`
+      const totalColumns = weeks.value.length * 11
+      return `230px repeat(${totalColumns}, 1fr)`
     })
-
-
 
 
     const getColumnPosition = (weekIndex, columnIndex) => {
       let position = 2 // После первой колонки (Регион/Магазин)
-      // пред нед
+
+      // Считаем колонки предыдущих недель
       for (let i = 0; i < weekIndex; i++) {
         position += showPlanFactColumns.value[weeks.value[i].id] ? 11 : 7
       }
@@ -517,535 +586,445 @@ export default {
       return position + columnIndex
     }
 
-const refreshData = async () => {
-  await loadData()
-}
 
-onMounted(() => {
-  loadData()
-})
 
-return {
-  loading,
-  error,
-  weeks,
-  regions,
-  sortedRegions,
-  sortBy,
-  sortOrder,
-  isAnimating,
-  colors,
-  showPlanFactColumns,
-  gridTemplateColumns,
-  getColumnPosition,
-  getRegionWeekData,
-  getRegionTotalScore,
-  getRegionRank,
-  getStoreWeekData,
-  getAllSortedStores,
-  formatNumber,
-  getPercentClass,
-  getScoreClass,
-  handleSort,
-  toggleSortOrder,
-  refreshData,
-  loadData,
-  toggleColumn
-}
+
+
+
+    const refreshData = async () => {
+      await loadData()
+    }
+
+    onMounted(() => {
+      loadData()
+    })
+
+    return {
+      loading,
+      error,
+      weeks,
+      regions,
+      sortedRegions,
+      sortBy,
+      sortOrder,
+      isAnimating,
+      colors,
+      showPlanFactColumns,
+      gridTemplateColumns,
+      getColumnPosition,
+      getRegionWeekData,
+      getRegionTotalScore,
+      getRegionRank,
+      getStoreWeekData,
+      getAllSortedStores,
+      formatNumber,
+      getPercentClass,
+      getScoreClass,
+      handleSort,
+      toggleSortOrder,
+      refreshData,
+      loadData,
+      toggleColumn
+    }
   }
 }
 </script>
 
 <style lang="scss" scoped>
 
-// $primary-color: #2196f3;
-// $success-color: #2e7d32;
-// $warning-color: #f57c00;
-// $danger-color: #d32f2f;
-// $light-success: #28a745;
-// $light-warning: #ffebee;
-// $light-danger: #c62828;
-
-// $border-color: #e0e0e0;
-// $border-light: #dee2e6;
-// $background-light: #f5f5f5;
-// $background-white: white;
-// $background-hover: #fafafa;
-// $background-week: #e3f2fd;
-// $background-negative: #ffebee;
-
-// $text-primary: #333;
-// $text-secondary: #555;
-// $text-week: #0f4478;
-// $text-disabled: #6c757d;
-
-// $border-radius: 4px;
-// $border-radius-lg: 8px;
-// $font-size-sm: 11px;
-// $font-size-base: 13px;
-// $font-size-lg: 16px;
-// $padding-sm: 6px 8px;
-// $padding-base: 8px 12px;
-// $padding-lg: 15px 20px;
-
-.sales-table-container {
+.table-container {
   width: 100%;
   min-height: 100vh;
-  max-width: 1900px;
-  min-width: 1642px;
+  /* max-width: 1900px; */
+  min-width: 1300px;
   margin: 0 auto;
   padding: 0 20px;
-}
 
-.custom-table {
-  background: white;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  overflow-x: auto;
-}
-
-.table-header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: white;
-  display: grid;
-  grid-template-rows: auto auto auto;
-}
-
-.store-name-column {
-  grid-row: 1 / 4;
-  grid-column: 1;
-}
-
-.header-row {
-  display: contents;
-}
-
-.table-header,
-.data-row {
-  display: grid;
-  font-size: 12px;
-}
-
-.header-cell {
-  padding: 8px;
-  text-align: center;
-  font-weight: 600;
-  color: #333;
-  border-right: 1px solid #c7c8c9;
-  // box-shadow: 1px 1px 1px 1px red;
-  background: #e7e7e7;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.week-group {
-  grid-column: span v-bind('showPlanFactColumns ? 11 : 9');
-  background: #e3f2fd;
-  color: #0f4478;
-  font-size: 16px;
-}
-
-.colspan-2 {
-  grid-column: span 2;
-}
-
-.colspan-4 {
-  grid-column: span 4;
-}
-
-.metric-header {
-  background: #e7e7e7;
-}
-
-.sub-header {
-  background: #e7e7e7;
-  font-size: 12px;
-}
-
-.score-max {
-  color: #2e7d32;
-}
-
-.empty-cell,
-.empty-sub {
-  visibility: hidden;
-}
-
-.table-body {
-  min-height: 100px;
-}
-
-.data-row {
-  display: grid;
-  border-bottom: 1px solid #e0e0e0;
-  transition: all 0.3s ease;
-
-  &:hover {
-    background: #fafafa;
-  }
-}
-
-.region-row {
-  font-weight: 600;
-}
-
-.data-cell {
-  padding: 6px 8px;
-  border-right: 1px solid #e0e0e0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-}
-
-.region-name,
-.store-name {
-  justify-content: flex-start;
-  padding-left: 16px;
-}
-
-.plan,
-.fact,
-.losses,
-.shortages,
-.fop {
-  text-align: right;
-  justify-content: flex-end;
-  font-family: monospace;
-}
-
-.percent {
-  font-weight: 600;
-}
-
-.score-current {
-  font-weight: 600;
-}
-
-.success {
-  color: #2e7d32;
-}
-
-.warning {
-  color: #f57c00;
-}
-
-.danger {
-  color: #d32f2f;
-}
-
-.status-value {
-  display: inline-block;
-  padding: 2px 6px;
-  border-radius: 2px;
-  font-size: 11px;
-  font-weight: 600;
-
-  &.negative {
-    background: #ffebee;
-    color: #c62828;
-  }
-}
-
-.table-separator {
-  height: 15px;
-  background: #e7e7e7;
-}
-
-.unprocessed {
-  border-right: 1px solid #c7c8c9;
-}
-
-.hide-plan-fact {
-  .plan-column,
-  .fact-column {
-    display: none;
-    transition: all 0.3s ease;
-  }
-}
-
-.region-info,
-.store-info {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.region-indicator {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.plan-column,
-.fact-column {
-  min-width: 76px;
-}
-
-.region-rank,.h_rang  {
-  min-width: 53px;
-}
-
-
-// .h_rang {
-//   min-width: 53px;
-// }
-
-.h_perc {
-  min-width: 42px;
-}
-
-.h_fop {
-  min-width: 72px;
-}
-
-.score-max,
-.store-rank {
-  min-width: 46px;
-}
-
-.score-current {
-  min-width: 36px;
-}
-
-.losses, .h_loss {
-  min-width: 70px;
-}
-.fop, .h_fop {
-  min-width: 70px;
-}
-.shortages, .h_short {
-  min-width: 70px;
-}
-
-.shift, .h_minus {
-  min-width: 66px;
-}
-
-.unprocessed, .h_spys {
-  min-width: 70px;
-}
-
-.controls-panel {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: white;
-  padding: 15px 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
-}
-
-.sorting-controls {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-
-  label {
-    font-weight: 600;
-    color: #555;
-  }
-
-  select {
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background: white;
-  }
-}
-
-.sort-order-btn,
-.refresh-btn {
-  padding: 8px 12px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background-color 0.3s;
-}
-
-.sort-order-btn {
-  background: #007bff;
-  color: white;
-
-  &:hover {
-    background: #0056b3;
-  }
-}
-
-.refresh-btn {
-  background: #28a745;
-  color: white;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-
-  &:hover:not(:disabled) {
-    background: #218838;
-  }
-
-  &:disabled {
-    background: #6c757d;
-    cursor: not-allowed;
-    opacity: 0.6;
-  }
-}
-
-.loading-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: #e0e0e0;
-  z-index: 10000;
-}
-
-.loading-progress {
-  height: 100%;
-  background: #2196f3;
-  animation: loading 0.5s ease-in-out infinite;
-}
-
-@keyframes loading {
-  0% {
-    width: 0%;
-  }
-  50% {
-    width: 70%;
-  }
-  100% {
-    width: 100%;
-  }
-}
-
-.content {
-  padding: 20px;
-  animation: fadeIn 0.25s ease-in;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-
-
-.h_toggle {
-  display: flex;
-  align-items: center;
-  justify-content: left;
-}
-
-.vtrg {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.togler {
-  position: absolute;
-  border-radius: 2px;
-  right: -20px;
-  top: 2px;
-  margin-left: 5px;
-  font-size: 10px;
-  width: 15px;
-  height: 15px;
-  color: white;
-  background-color: white;
-}
-
-.region-row,
-.store-row {
-  transition: all 0.2s ease;
-  transform-origin: center;
-
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(1, 80, 133, 0.5);
-    z-index: 10;
-    position: relative;
-  }
-}
-
-.error {
-  text-align: center;
-  padding: 40px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-
-  .error-icon {
-    font-size: 48px;
-    margin-bottom: 16px;
-  }
-
-  h3 {
-    color: #d32f2f;
-    margin-bottom: 8px;
-  }
-
-  p {
-    color: #555;
-    margin-bottom: 20px;
-  }
-
-  .retry-btn {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background-color 0.3s;
-    background: #2196f3;
-    color: white;
-
-    &:hover {
-      background: #1976d2;
+  .loading-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: #e0e0e0;
+    z-index: 10000;
+
+    .loading-progress {
+      height: 100%;
+      background: #2196f3;
+      animation: loading .5s ease-in-out infinite;
     }
-  }
-}
 
+    @keyframes loading {
+      0% {
+        width: 0%;
+      }
 
-@media (prefers-color-scheme: light) {
-  .sales-table-container {
-    background: #1a1a1a;
-    color: #ffffff;
-  }
-  
-  .custom-table {
-    background: #2d2d2d;
-    
-    .header-cell {
-      background: #3a3a3a;
-      color: #ffffff;
-      border-color: #4a4a4a;
-    }
-    
-    .data-row {
-      border-color: #4a4a4a;
-      
-      &:hover {
-        background: #3a3a3a;
+      50% {
+        width: 70%;
+      }
+
+      100% {
+        width: 100%;
       }
     }
-    
-    .data-cell {
-      border-color: #4a4a4a;
+  }
+
+
+  .content {
+    padding: 20px;
+    animation: fadeIn 0.25s ease-in;
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .controls-panel {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+
+      .sorting-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        label {
+          font-weight: 600;
+          color: #555;
+        }
+      }
+
+      .refresh-btn {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        /* font-size: 14px; */
+        font-weight: 600;
+        transition: background-color 0.3s;
+      }
+    }
+
+    .hide-plan-fact .plan-column,
+    .hide-plan-fact .fact-column {
+      display: none;
+      transition: all 0.3s ease;
+      min-width: 76px;
+    }
+
+    .custom-table {
+      background: white;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      overflow-x: auto;
+
+      .table-header {
+        display: grid;
+        grid-template-columns: 230px repeat(v-bind('weeks.length * (showPlanFactColumns ? 11 : 9)'), 1fr);
+        font-size: 12px;
+
+        .store-name-column {
+          grid-row: 1 / 4;
+        }
+
+        .h_toggle {
+          display: flex;
+          align-items: center;
+          justify-content: left;
+
+          .vtrg {
+            position: relative;
+            display: flex;
+            align-items: center;
+          }
+
+          .togler {
+            position: absolute;
+            border-radius: 2px;
+            right: -20px;
+            top: 2px;
+            margin-left: 5px;
+            font-size: 10px;
+            width: 15px;
+            height: 15px;
+            color: white;
+            background-color: white;
+          }
+        }
+
+        .header-cell {
+          padding: 8px;
+          text-align: center;
+          font-weight: 600;
+          color: #333;
+          border: 1px solid #dee2e6;
+          background: #f5f5f5;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .week-group {
+          grid-column: span v-bind('showPlanFactColumns ? 11 : 9');
+          background: #e3f2fd;
+          color: #0f4478;
+          font-size: 16px;
+        }
+
+        .metric-header {
+          background: #f5f5f5;
+        }
+
+        .header-cell {
+          padding: 8px;
+          text-align: center;
+          font-weight: 600;
+          color: #333;
+          border: 1px solid #dee2e6;
+          // background: #f5f5f5;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+
+        }
+
+        .sub-header {
+          background: #f5f5f5;
+          font-size: 12px;
+        }
+
+        .h_rang {
+          min-width: 54px;
+        }
+
+        .h_fop {
+          min-width: 72px;
+        }
+
+        .score-max {
+          /* background: #e8f5e9; */
+          color: #2e7d32;
+        }
+
+        .score-current {
+          font-weight: 600;
+        }
+
+        .hide-plan-fact .plan-column,
+        .hide-plan-fact .fact-column {
+          display: none;
+          transition: all 0.3s ease;
+        }
+
+        .h_perc {
+          min-width: 40px;
+        }
+
+
+
+      }
+
+      .table-body {
+        min-height: 100px;
+
+        .data-row {
+          display: grid;
+          grid-template-columns: 230px repeat(v-bind('weeks.length * (showPlanFactColumns ? 11 : 7)'), 1fr);
+          border-bottom: 1px solid #e0e0e0;
+          transition: all 0.3s ease;
+
+          &:hover {
+            background: #fafafa;
+          }
+        }
+
+        .region-row {
+          font-weight: 600;
+
+          .data-cell {
+            padding: 6px 8px;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+
+            .region-info,
+            .store-info {
+              display: flex;
+              align-items: center;
+              gap: 6px;
+
+              .region-indicator {
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                display: inline-block;
+              }
+
+            }
+          }
+
+          .region-name,
+          .store-name {
+            justify-content: flex-start;
+            padding-left: 16px;
+          }
+
+          .score-max,
+          .region-rank,
+          .store-rank {
+            min-width: 53px;
+          }
+
+          .score-current {
+            min-width: 36px;
+          }
+
+          .losses,
+          .shortages,
+          .fop {
+            min-width: 73px;
+          }
+
+          .plan,
+          .fact,
+          .losses,
+          .shortages,
+          .fop {
+            text-align: right;
+            justify-content: flex-end;
+            font-family: monospace;
+          }
+
+          .hide-plan-fact .plan-column,
+          .hide-plan-fact .fact-column {
+            display: none;
+            transition: all 0.3s ease;
+          }
+
+          .percent {
+            font-weight: 600;
+          }
+
+          .losses,
+          .shortages,
+          .fop {
+            min-width: 73px;
+          }
+
+          .shift {
+            min-width: 66px;
+          }
+
+          .unprocessed {
+            min-width: 76px;
+          }
+        }
+
+        .table-separator {
+          height: 15px;
+          background: #f5f5f5;
+        }
+
+        .stores-body {
+          .data-row {
+            display: grid;
+            font-size: 12px;
+            grid-template-columns: 230px repeat(v-bind('weeks.length * (showPlanFactColumns ? 11 : 7)'), 1fr);
+            border-bottom: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+
+            &:hover {
+              background: #fafafa;
+            }
+          }
+
+          .store-row {
+            transition: all .5s ease;
+            transform-origin: center;
+
+            .store-name {
+              justify-content: flex-start;
+              padding-left: 16px;
+
+              .store-info {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+
+                .region-indicator {
+                  width: 12px;
+                  height: 12px;
+                  border-radius: 50%;
+                  display: inline-block;
+                }
+              }
+            }
+
+            .score-max,
+            .region-rank,
+            .store-rank {
+              min-width: 53px;
+            }
+
+            .score-current {
+              min-width: 36px;
+            }
+
+            .hide-plan-fact .plan-column,
+            .hide-plan-fact .fact-column {
+              display: none;
+              transition: all 0.3s ease;
+            }
+
+            .percent {
+              font-weight: 600;
+            }
+
+            .losses,
+            .shortages,
+            .fop {
+              min-width: 73px;
+            }
+
+            .shift,
+            .unprocessed {
+              min-width: 66px;
+
+              .status-value {
+                display: inline-block;
+                padding: 2px 6px;
+                border-radius: 2px;
+                font-size: 11px;
+                font-weight: 600;
+              }
+
+              .negative {
+                background: #ffebee;
+                color: #c62828;
+              }
+
+            }
+          }
+        }
+      }
     }
   }
 }
-
 </style>
