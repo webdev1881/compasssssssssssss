@@ -1,11 +1,12 @@
 <template>
   <div id="app">
-    <!-- <TableComponent /> -->
-    <!-- <Tt /> -->
-    <Tdiv />
+    'SSSSSSSSS'
+    <TableComponent />
     <Tdiv2 />
-    <!-- <T /> -->
-    <!-- <TableComponent0 /> -->
+    <Tdiv />
+    <Tt />
+    <T />
+    <TableComponent0 />
   </div>
 </template>
 

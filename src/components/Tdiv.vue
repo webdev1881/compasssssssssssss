@@ -381,9 +381,7 @@ export default {
 
     const sortedRegions = computed(() => {
       if (!regions.value) return []
-
       const sorted = [...regions.value]
-
       sorted.sort((a, b) => {
         let aValue, bValue
 
